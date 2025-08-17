@@ -64,7 +64,7 @@ const fetchSummary = async (prompt) => {
     formData.append('prompt', prompt);
 
     try {
-        const response = await fetch('http://localhost:3000/summarize', {
+        const response = await fetch('/api/summarize', {
             method: 'POST',
             body: formData,
         });
