@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuSense - PDF Summarizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PDF.js for client-side PDF parsing and rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <!-- jsPDF for client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body class="min-h-screen bg-white text-gray-800 transition-colors duration-300 dark:bg-slate-900 dark:text-gray-200">
+  <div class="container mx-auto p-4 md:p-8">
+    <!-- Header -->
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white">DocuSense</h1>
+      <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">Summarize your documents in a flash</p>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <!-- Upload Section -->
+      <section id="upload-section" class="flex flex-col items-center justify-center min-h-[50vh] transition-opacity duration-500 ease-in-out">
+        <div id="file-drop-area" class="file-drop-area flex flex-col items-center justify-center p-12 w-full max-w-2xl rounded-2xl cursor-pointer text-center transition-all duration-300 hover:border-blue-500 hover:bg-gray-50 dark:hover:bg-slate-800">
+          <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4v-1a4 4 0 014-4h10a4 4 0 014 4v1a4 4 0 01-4 4h-1"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V5m0 6l-4 4m4-4l4 4"></path>
+          </svg>
+          <p class="text-gray-500 font-medium">Drag & drop your PDF here</p>
+          <p class="text-sm text-gray-400 mt-1">or</p>
+          <button id="upload-button" class="mt-4 px-6 py-3 bg-blue-500 text-white font-semibold rounded-full shadow-lg transition-all duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Upload PDF
+          </button>
+          <input id="file-input" type="file" accept=".pdf" class="hidden">
+        </div>
+        <p id="upload-status" class="mt-4 text-sm text-gray-500"></p>
+      </section>
+
+      <!-- Workspace Section (Hidden by default) -->
+      <section id="workspace-section" class="hidden flex-col md:flex-row gap-8 transition-opacity duration-500 ease-in-out">
+        <!-- PDF Preview Panel (Left) -->
+        <div class="w-full md:w-3/2 p-4 bg-gray-100 rounded-xl shadow-md dark:bg-slate-800">
+          <h2 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">PDF Preview</h2>
+          <div id="pdf-viewer-container" class="relative w-full h-[60vh] rounded-lg overflow-y-auto overflow-x-hidden p-2 bg-white dark:bg-slate-900">
+            <!-- Canvas will render PDF pages here -->
+            <div id="pdf-pages" class="space-y-4"></div>
+            <p id="pdf-status" class="text-center text-sm text-gray-500 mt-4 hidden">Rendering PDF...</p>
+          </div>
+        </div>
+
+        <!-- Summary Panel (Right) -->
+        <div class="w-full md:w-3/4 p-6 bg-gray-100 rounded-xl shadow-md dark:bg-slate-800">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">AI Summary</h2>
+            <div id="summary-options" class="inline-flex space-x-1 p-1 bg-gray-200 rounded-full dark:bg-slate-700">
+              <button data-type="concise" class="px-4 py-1 text-sm font-medium rounded-full transition-all duration-200 bg-white shadow-sm text-blue-600 dark:bg-slate-900 dark:text-blue-400">Concise</button>
+              <button data-type="detailed" class="px-4 py-1 text-sm font-medium rounded-full transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-900">Detailed</button>
+              <button data-type="bullet" class="px-4 py-1 text-sm font-medium rounded-full transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-900">Bullet</button>
+            </div>
+          </div>
+          <div id="summary-output-container" class="relative p-4 bg-white rounded-lg min-h-[40vh] shadow-inner dark:bg-slate-900">
+            <p id="summary-output" class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">Your AI-generated summary will appear here.</p>
+          </div>
+          <div class="flex flex-col sm:flex-row justify-end mt-4 space-y-2 sm:space-y-0 sm:space-x-4">
+            <button id="regenerate-button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-full transition-all duration-200 hover:bg-gray-300 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600">
+              Regenerate
+            </button>
+            <button id="copy-button" class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-full transition-all duration-200 hover:bg-gray-300 dark:bg-slate-700 dark:text-gray-300 dark:hover:bg-slate-600">
+              Copy
+            </button>
+            <button id="download-button" class="px-4 py-2 bg-blue-500 text-white font-medium rounded-full shadow-lg transition-all duration-200 hover:bg-blue-600">
+              Download Summary
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  
+  <!-- New footer element -->
+  <footer class="mt-12 text-center text-sm text-gray-400">
+    <p>Made by Akarshan</p>
+    <p>Estd 2025</p>
+  </footer>
+
+  <!-- Link to the external JavaScript file -->
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

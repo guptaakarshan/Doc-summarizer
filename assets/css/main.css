@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+body {
+  font-family: 'Poppins', sans-serif;
+}
+.file-drop-area {
+  border: 2px dashed #9ca3af;
+  transition: border-color 0.3s;
+}
+.file-drop-area.drag-over {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+}
+/* Dark mode styles */
+.dark .bg-light-mode {
+  background-color: #1a202c;
+}
+.dark .bg-card-light {
+  background-color: #02060c;
+}
+.dark .text-dark-mode {
+  color: #e2e8f0;
+}
+#pdf-pages canvas {
+    width: 100%;
+    height: auto;
+}
